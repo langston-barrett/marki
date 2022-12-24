@@ -1,0 +1,19 @@
+[package]
+name = "marki"
+version = "0.1.0"
+edition = "2021"
+authors = ["Langston Barrett <langston.barrett@gmail.com>"]
+keywords = ["anki", "markdown"]
+description = "Generate Anki cards from Markdown notes"
+license = "MIT"
+repository = "https://github.com/langston-barrett/marki"
+categories = ["command-line-utilities"]
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4.0", features = ["derive"] }
+genanki-rs = "0.3"
+pulldown-cmark = { version = "0.9", default-features = false, features = ["simd"] }
+
+[profile.release]
+lto = true
