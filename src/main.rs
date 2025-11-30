@@ -158,6 +158,26 @@ fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use expect_test::expect;
+
+    fn format_cards(cards: &[Card]) -> String {
+        if cards.is_empty() {
+            return "No cards found".to_string();
+        }
+        cards
+            .iter()
+            .enumerate()
+            .map(|(i, card)| {
+                format!(
+                    "Card {}:\n  Front: {}\n  Back: {}",
+                    i + 1,
+                    card.front,
+                    card.back
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n\n")
+    }
 
     #[test]
     fn test_extract_single_card() {
@@ -167,12 +187,11 @@ Q. What is marki?
 
 A. A tool to generate Anki cards from Markdown notes."#;
         let cards = extract_string(md, "test.md", false);
-        assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0].front, "What is marki?");
-        assert_eq!(
-            cards[0].back,
-            "A tool to generate Anki cards from Markdown notes."
-        );
+        expect![[r#"
+            Card 1:
+              Front: What is marki?
+              Back: A tool to generate Anki cards from Markdown notes."#]]
+        .assert_eq(&format_cards(&cards));
     }
 
     #[test]
@@ -189,19 +208,15 @@ Q. What is the syntax for beginning a marki card?
 
 A. The following specially-formatted HTML comment: `<!-- marki[card] -->`"#;
         let cards = extract_string(md, "test.md", false);
-        assert_eq!(cards.len(), 2);
-        assert_eq!(cards[0].front, "What is marki?");
-        assert_eq!(
-            cards[0].back,
-            "A tool to generate Anki cards from Markdown notes."
-        );
-        assert_eq!(
-            cards[1].front,
-            "What is the syntax for beginning a marki card?"
-        );
-        assert!(cards[1]
-            .back
-            .contains("The following specially-formatted HTML comment"));
+        expect![[r#"
+            Card 1:
+              Front: What is marki?
+              Back: A tool to generate Anki cards from Markdown notes.
+
+            Card 2:
+              Front: What is the syntax for beginning a marki card?
+              Back: The following specially-formatted HTML comment: <code>&lt;!-- marki[card] --&gt;</code>"#]]
+        .assert_eq(&format_cards(&cards));
     }
 
     #[test]
@@ -210,7 +225,7 @@ A. The following specially-formatted HTML comment: `<!-- marki[card] -->`"#;
 
 No cards here."#;
         let cards = extract_string(md, "test.md", false);
-        assert_eq!(cards.len(), 0);
+        expect!["No cards found"].assert_eq(&format_cards(&cards));
     }
 
     #[test]
@@ -219,9 +234,11 @@ No cards here."#;
 
 A. This card has no front."#;
         let cards = extract_string(md, "test.md", false);
-        assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0].front, "");
-        assert_eq!(cards[0].back, "This card has no front.");
+        expect![[r#"
+            Card 1:
+              Front: 
+              Back: This card has no front."#]]
+        .assert_eq(&format_cards(&cards));
     }
 
     #[test]
@@ -230,7 +247,7 @@ A. This card has no front."#;
 
 Q. This card has no back."#;
         let cards = extract_string(md, "test.md", false);
-        assert_eq!(cards.len(), 0);
+        expect!["No cards found"].assert_eq(&format_cards(&cards));
     }
 
     #[test]
@@ -241,9 +258,11 @@ Q. What is `marki`?
 
 A. A tool to generate Anki cards."#;
         let cards = extract_string(md, "test.md", false);
-        assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0].front, "What is <code>marki</code>?");
-        assert_eq!(cards[0].back, "A tool to generate Anki cards.");
+        expect![[r#"
+            Card 1:
+              Front: What is <code>marki</code>?
+              Back: A tool to generate Anki cards."#]]
+        .assert_eq(&format_cards(&cards));
     }
 
     #[test]
@@ -254,11 +273,10 @@ Q. What is the syntax?
 
 A. Use `<!-- marki[card] -->` to start a card."#;
         let cards = extract_string(md, "test.md", false);
-        assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0].front, "What is the syntax?");
-        assert_eq!(
-            cards[0].back,
-            "Use <code>&lt;!-- marki[card] --&gt;</code> to start a card."
-        );
+        expect![[r#"
+            Card 1:
+              Front: What is the syntax?
+              Back: Use <code>&lt;!-- marki[card] --&gt;</code> to start a card."#]]
+        .assert_eq(&format_cards(&cards));
     }
 }
