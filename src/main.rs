@@ -131,3 +131,82 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_single_card() {
+        let md = r#"<!-- marki[card] -->
+
+Q. What is marki?
+
+A. A tool to generate Anki cards from Markdown notes."#;
+        let cards = extract_string(md, "test.md", false);
+        assert_eq!(cards.len(), 1);
+        assert_eq!(cards[0].front, "What is marki?");
+        assert_eq!(
+            cards[0].back,
+            "A tool to generate Anki cards from Markdown notes."
+        );
+    }
+
+    #[test]
+    fn test_extract_multiple_cards() {
+        let md = r#"<!-- marki[card] -->
+
+Q. What is marki?
+
+A. A tool to generate Anki cards from Markdown notes.
+
+<!-- marki[card] -->
+
+Q. What is the syntax for beginning a marki card?
+
+A. The following specially-formatted HTML comment: `<!-- marki[card] -->`"#;
+        let cards = extract_string(md, "test.md", false);
+        assert_eq!(cards.len(), 2);
+        assert_eq!(cards[0].front, "What is marki?");
+        assert_eq!(
+            cards[0].back,
+            "A tool to generate Anki cards from Markdown notes."
+        );
+        assert_eq!(
+            cards[1].front,
+            "What is the syntax for beginning a marki card?"
+        );
+        assert!(cards[1]
+            .back
+            .contains("The following specially-formatted HTML comment"));
+    }
+
+    #[test]
+    fn test_extract_no_cards() {
+        let md = r#"This is just regular markdown content.
+
+No cards here."#;
+        let cards = extract_string(md, "test.md", false);
+        assert_eq!(cards.len(), 0);
+    }
+
+    #[test]
+    fn test_extract_card_with_empty_front() {
+        let md = r#"<!-- marki[card] -->
+
+A. This card has no front."#;
+        let cards = extract_string(md, "test.md", false);
+        assert_eq!(cards.len(), 1);
+        assert_eq!(cards[0].front, "");
+        assert_eq!(cards[0].back, "This card has no front.");
+    }
+
+    #[test]
+    fn test_extract_card_with_empty_back() {
+        let md = r#"<!-- marki[card] -->
+
+Q. This card has no back."#;
+        let cards = extract_string(md, "test.md", false);
+        assert_eq!(cards.len(), 0);
+    }
+}
