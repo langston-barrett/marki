@@ -13,6 +13,12 @@ struct Card {
     back: String,
 }
 
+fn escape_html(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+}
+
 fn extract_string(md: &str, path: &str, _verbose: bool) -> Vec<Card> {
     let mut cards = Vec::new();
     // let mut id: Option<String> = None;
@@ -59,10 +65,27 @@ fn extract_string(md: &str, path: &str, _verbose: bool) -> Vec<Card> {
                     if let Some(q) = txt.strip_prefix("Q. ") {
                         in_front = true;
                         front += q;
-                    }
-                    if let Some(a) = txt.strip_prefix("A. ") {
+                    } else if let Some(a) = txt.strip_prefix("A. ") {
                         in_back = true;
                         back += a;
+                    } else if in_front {
+                        front += &txt;
+                    } else if in_back {
+                        back += &txt;
+                    }
+                }
+            }
+            Event::Code(code) => {
+                if seen_comment {
+                    let escaped = escape_html(&code);
+                    if in_front {
+                        front += "<code>";
+                        front += &escaped;
+                        front += "</code>";
+                    } else if in_back {
+                        back += "<code>";
+                        back += &escaped;
+                        back += "</code>";
                     }
                 }
             }
@@ -208,5 +231,34 @@ A. This card has no front."#;
 Q. This card has no back."#;
         let cards = extract_string(md, "test.md", false);
         assert_eq!(cards.len(), 0);
+    }
+
+    #[test]
+    fn test_extract_card_with_backticks_in_question() {
+        let md = r#"<!-- marki[card] -->
+
+Q. What is `marki`?
+
+A. A tool to generate Anki cards."#;
+        let cards = extract_string(md, "test.md", false);
+        assert_eq!(cards.len(), 1);
+        assert_eq!(cards[0].front, "What is <code>marki</code>?");
+        assert_eq!(cards[0].back, "A tool to generate Anki cards.");
+    }
+
+    #[test]
+    fn test_extract_card_with_backticks_in_answer() {
+        let md = r#"<!-- marki[card] -->
+
+Q. What is the syntax?
+
+A. Use `<!-- marki[card] -->` to start a card."#;
+        let cards = extract_string(md, "test.md", false);
+        assert_eq!(cards.len(), 1);
+        assert_eq!(cards[0].front, "What is the syntax?");
+        assert_eq!(
+            cards[0].back,
+            "Use <code>&lt;!-- marki[card] --&gt;</code> to start a card."
+        );
     }
 }
