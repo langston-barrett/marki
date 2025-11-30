@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use genanki_rs::{Deck, Field, Model, Note, Template};
-use pulldown_cmark::{Event, Tag};
+use pulldown_cmark::{Event, TagEnd};
 
 mod cli;
 
@@ -66,7 +66,7 @@ fn extract_string(md: &str, path: &str, _verbose: bool) -> Vec<Card> {
                     }
                 }
             }
-            Event::End(Tag::Paragraph) => {
+            Event::End(TagEnd::Paragraph) => {
                 if in_front {
                     in_front = false;
                 }

@@ -13,7 +13,7 @@ categories = ["command-line-utilities"]
 anyhow = "1"
 clap = { version = "4.1", features = ["derive"] }
 genanki-rs = "0.4"
-pulldown-cmark = { version = "0.9", default-features = false, features = ["simd"] }
+pulldown-cmark = { version = "0.13", default-features = false, features = ["simd"] }
 
 [profile.release]
 lto = true
