@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 /// Generate Anki cards from Markdown notes
 #[derive(Debug, clap::Parser)]
-pub struct Args {
+pub(crate) struct Args {
     /// Markdown files
     #[arg()]
     pub file: Vec<String>,
