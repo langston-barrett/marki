@@ -98,14 +98,14 @@ fn extract_string(md: &str, path: &str, _verbose: bool) -> Vec<Card> {
 }
 
 fn extract_file(path: &str, verbose: bool) -> Result<Vec<Card>> {
-    let md = std::fs::read_to_string(path).with_context(|| format!("Couldn't read {}", path))?;
+    let md = std::fs::read_to_string(path).with_context(|| format!("Couldn't read {path}"))?;
     Ok(extract_string(&md, path, verbose))
 }
 
 fn main() -> Result<()> {
-    let args = crate::cli::Args::parse();
+    let args = cli::Args::parse();
     let model = Model::new(
-        1608492319, // arbitrary
+        1_608_492_319, // arbitrary
         "Marki Basic",
         vec![Field::new("Front"), Field::new("Back")],
         vec![Template::new("Card")
@@ -113,7 +113,7 @@ fn main() -> Result<()> {
             .afmt(r#"{{Front}}<hr id="answer">{{Back}}"#)],
     );
     let mut deck = Deck::new(
-        2050400110, // arbitrary
+        2_050_400_110, // arbitrary
         &args.deck,
         "Marki-generated deck",
     );
