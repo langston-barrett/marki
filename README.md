@@ -19,7 +19,7 @@ A. A tool to generate Anki cards from Markdown notes.
 
 TODO: https://github.com/yannickfunk/genanki-rs/issues/12
 
-The content of the comment after `:` becomes the unique ID assocated with this
+The content of the comment after `:` becomes the unique ID associated with this
 card, so that you can modify the wording later without creating a new card.
 
 -->
@@ -34,7 +34,7 @@ Marki doesn't support:
 
 - Media files
 - Other note types (including cloze)
-- Rewording cards without creating duplicates 
+- Rewording cards without creating duplicates
   (see [genanki-rs#12](https://github.com/yannickfunk/genanki-rs/issues/12))
 
 ## Install

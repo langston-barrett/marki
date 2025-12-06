@@ -171,7 +171,11 @@ mod tests {
                 format!(
                     "Card {}:\n  Front: {}\n  Back: {}",
                     i + 1,
-                    card.front,
+                    if card.front.is_empty() {
+                        "<empty>"
+                    } else {
+                        &card.front
+                    },
                     card.back
                 )
             })
@@ -236,7 +240,7 @@ A. This card has no front."#;
         let cards = extract_string(md, "test.md", false);
         expect![[r#"
             Card 1:
-              Front: 
+              Front: <empty>
               Back: This card has no front."#]]
         .assert_eq(&format_cards(&cards));
     }

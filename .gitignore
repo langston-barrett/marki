@@ -1,3 +1,6 @@
 *.apkg
 /target
 marki
+
+*.ninja
+/.out/
